@@ -8,6 +8,7 @@
   <h2>Firma aquí abajo</h2>
   <canvas id="firma" width="400" height="200" style="border:1px solid #000; touch-action: none;"></canvas><br>
   <button onclick="guardarFirma()">Guardar Firma</button>
+  <button onclick="descargarFirma()">Descargar Firma</button>
   <br><br>
   <img id="imgFirma" style="display:none;"/>
   <script>
@@ -15,7 +16,7 @@
     const ctx = canvas.getContext("2d");
     let dibujando = false;
 
-    // PC: Mouse
+    // Eventos para PC (mouse)
     canvas.addEventListener("mousedown", e => {
       dibujando = true;
       dibujar({ x: e.offsetX, y: e.offsetY });
@@ -28,7 +29,7 @@
       if (dibujando) dibujar({ x: e.offsetX, y: e.offsetY });
     });
 
-    // Móviles: Touch
+    // Eventos para móviles (touch)
     canvas.addEventListener("touchstart", e => {
       e.preventDefault();
       dibujando = true;
@@ -67,10 +68,18 @@
     }
 
     function guardarFirma() {
-      const imgData = canvas.toDataURL();
-      document.getElementById("imgFirma").src = imgData;
-      document.getElementById("imgFirma").style.display = 'block';
-      console.log(imgData); // Imagen en base64
+      const imgData = canvas.toDataURL("image/png");
+      const img = document.getElementById("imgFirma");
+      img.src = imgData;
+      img.style.display = 'block';
+    }
+
+    function descargarFirma() {
+      const imgData = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = 'firma.png';
+      link.click();
     }
   </script>
 </body>
