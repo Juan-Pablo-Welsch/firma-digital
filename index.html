@@ -45,12 +45,20 @@
       border-radius: 5px;
     }
 
-    canvas {
-      display: block;
-      margin: 0 auto 10px auto;
+    .canvas-container {
+      width: 100%;
+      aspect-ratio: 2 / 1;
       border: 2px solid #333;
       background: #fff;
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
       touch-action: none;
+      display: block;
     }
 
     button {
@@ -91,10 +99,13 @@
 
     <p class="instrucciones">Por favor, firme en el recuadro y descargue la imagen para luego adjuntarla al formulario correspondiente.</p>
 
-    <canvas id="firma" width="400" height="200"></canvas>
+    <div class="canvas-container">
+      <canvas id="firma"></canvas>
+    </div>
 
     <button onclick="guardarFirma()">Guardar Firma</button>
     <button onclick="descargarFirma()">Descargar Firma</button>
+    <button onclick="limpiarFirma()">Limpiar Firma</button>
 
     <img id="imgFirma" />
   </div>
@@ -102,9 +113,19 @@
   <script>
     const canvas = document.getElementById("firma");
     const ctx = canvas.getContext("2d");
+
+    function ajustarCanvas() {
+      const container = canvas.parentElement;
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+    }
+
+    window.addEventListener('resize', ajustarCanvas);
+    ajustarCanvas();
+
     let dibujando = false;
 
-    // Eventos para PC (mouse)
+    // Eventos PC
     canvas.addEventListener("mousedown", e => {
       dibujando = true;
       dibujar({ x: e.offsetX, y: e.offsetY });
@@ -117,7 +138,7 @@
       if (dibujando) dibujar({ x: e.offsetX, y: e.offsetY });
     });
 
-    // Eventos para móviles (touch)
+    // Eventos móviles
     canvas.addEventListener("touchstart", e => {
       e.preventDefault();
       dibujando = true;
@@ -172,7 +193,12 @@
       link.download = nombreArchivo;
       link.click();
     }
+
+    function limpiarFirma() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      document.getElementById("imgFirma").style.display = 'none';
+    }
   </script>
 </body>
 </html>
-
