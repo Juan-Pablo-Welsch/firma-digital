@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Firma Digital</title>
 </head>
 <body>
   <h2>Firma aquí abajo</h2>
-  <canvas id="firma" width="400" height="200" style="border:1px solid #000;"></canvas><br>
+  <canvas id="firma" width="400" height="200" style="border:1px solid #000; touch-action: none;"></canvas><br>
   <button onclick="guardarFirma()">Guardar Firma</button>
   <br><br>
   <img id="imgFirma" style="display:none;"/>
@@ -14,26 +15,61 @@
     const ctx = canvas.getContext("2d");
     let dibujando = false;
 
-    canvas.addEventListener("mousedown", e => { dibujando = true; dibujar(e); });
-    canvas.addEventListener("mouseup", () => { dibujando = false; ctx.beginPath(); });
-    canvas.addEventListener("mousemove", dibujar);
+    // PC: Mouse
+    canvas.addEventListener("mousedown", e => {
+      dibujando = true;
+      dibujar({ x: e.offsetX, y: e.offsetY });
+    });
+    canvas.addEventListener("mouseup", () => {
+      dibujando = false;
+      ctx.beginPath();
+    });
+    canvas.addEventListener("mousemove", e => {
+      if (dibujando) dibujar({ x: e.offsetX, y: e.offsetY });
+    });
 
-    function dibujar(e) {
-      if (!dibujando) return;
+    // Móviles: Touch
+    canvas.addEventListener("touchstart", e => {
+      e.preventDefault();
+      dibujando = true;
+      const pos = getTouchPos(e);
+      dibujar(pos);
+    });
+    canvas.addEventListener("touchend", e => {
+      e.preventDefault();
+      dibujando = false;
+      ctx.beginPath();
+    });
+    canvas.addEventListener("touchmove", e => {
+      e.preventDefault();
+      if (dibujando) {
+        const pos = getTouchPos(e);
+        dibujar(pos);
+      }
+    });
+
+    function dibujar(pos) {
       ctx.lineWidth = 2;
       ctx.lineCap = "round";
       ctx.strokeStyle = "black";
-      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(e.offsetX, e.offsetY);
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function getTouchPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top
+      };
     }
 
     function guardarFirma() {
       const imgData = canvas.toDataURL();
       document.getElementById("imgFirma").src = imgData;
       document.getElementById("imgFirma").style.display = 'block';
-      // Aquí puedes subir la imagen a un servidor o servicio como Firebase, Google Drive, etc.
       console.log(imgData); // Imagen en base64
     }
   </script>
